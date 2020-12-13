@@ -4,24 +4,24 @@ namespace Network.Graph
 {
     public class Edge
     {
-        public Node FirstNode { get; }
-        public Node SecondNode { get; }
+        public Node From { get; }
+        public Node To { get; }
 
-        public Edge(Node firstNode, Node secondNode)
+        public Edge(Node from, Node to)
         {
-            FirstNode = firstNode;
-            SecondNode = secondNode;
+            From = from;
+            To = to;
         }
 
         public Node GetOtherNode(Node node)
         {
-            if (node.Equals(FirstNode))
+            if (node.Equals(From))
             {
-                return SecondNode;
+                return To;
             }
-            if (node.Equals(SecondNode))
+            if (node.Equals(To))
             {
-                return FirstNode;
+                return From;
             }
             throw new ArgumentException();
         }
@@ -30,7 +30,7 @@ namespace Network.Graph
         {
             if (obj is Edge edge)
             {
-                if (edge.FirstNode.Equals(FirstNode) && edge.SecondNode.Equals(SecondNode))
+                if (edge.From.Equals(From) && edge.To.Equals(To))
                 {
                     return true;
                 }
@@ -40,7 +40,7 @@ namespace Network.Graph
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(FirstNode, SecondNode);
+            return HashCode.Combine(From, To);
         }
     }
 }

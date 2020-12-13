@@ -8,9 +8,15 @@
             g.AddNode(1);
             g.AddNode(2);
             g.AddNode(3);
+            
             g.AddEdge(1, 2);
+            g.AddEdge(2, 1);
+            g.AddEdge(1, 3);
             g.AddEdge(2, 3);
+            
             g.RemoveNode(2);
+            
+            g.RemoveEdge(1, 3);
         }
     }
 }

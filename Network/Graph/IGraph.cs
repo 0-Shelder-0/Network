@@ -4,8 +4,8 @@ namespace Network.Graph
     {
         void AddNode(int number);
         void RemoveNode(int number);
-        void AddEdge(int firstNodeNumber, int secondNodeNumber);
-        void RemoveEdge(int firstNodeNumber, int secondNodeNumber);
+        void AddEdge(int fromNumber, int toNumber);
+        void RemoveEdge(int fromNumber, int toNumber);
         bool Contains(int number);
     }
 }
