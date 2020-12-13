@@ -34,10 +34,8 @@ namespace Network.Graph
             foreach (var incidentEdge in currentNode.IncidentEdges())
             {
                 _edges.Remove(incidentEdge);
-                foreach (var incidentNode in currentNode.IncidentNodes())
-                {
-                    incidentNode.Edges.Remove(incidentEdge);
-                }
+                var node = incidentEdge.GetOtherNode(currentNode);
+                node.Edges.Remove(incidentEdge);
             }
             _nodes.Remove(currentNode);
         }
