@@ -3,9 +3,10 @@ namespace Network.Graph
     public interface IGraph
     {
         void AddNode(int number);
-        void RemoveNode(int number);
-        void AddEdge(int fromNumber, int toNumber);
-        void RemoveEdge(int fromNumber, int toNumber);
-        bool Contains(int number);
+        bool RemoveNode(int number);
+        void Connect(int firstNumber, int secondNumber);
+        bool Disconnect(int firstNumber, int secondNumber);
+        bool ContainsNode(int number);
+        bool IsConnect(int firstNumber, int secondNumber);
     }
 }

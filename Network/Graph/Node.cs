@@ -24,6 +24,12 @@ namespace Network.Graph
             return Edges.Select(edge => edge.GetOtherNode(this));
         }
 
+        public bool IsConnect(Node node)
+        {
+            return node.Equals(this) ||
+                   Edges.Any(edge => edge.Second.Equals(node) || edge.First.Equals(node));
+        }
+
         public override bool Equals(object obj)
         {
             if (obj is Node node)

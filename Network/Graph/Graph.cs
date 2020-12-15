@@ -15,61 +15,76 @@ namespace Network.Graph
 
         public void AddNode(int number)
         {
-            if (Contains(number))
+            if (ContainsNode(number))
             {
-                throw new ArgumentException("This number already exists!");
+                throw new ArgumentException("This node number already exists!");
             }
             _nodes.Add(new Node(number));
         }
 
-        public void RemoveNode(int number)
+        public bool RemoveNode(int number)
         {
-            var currentNode = GetNode(number);
-            if (currentNode == null)
+            if (!ContainsNode(number))
             {
-                throw new ArgumentException("This number not found!");
+                return false;
             }
+            var currentNode = GetNode(number);
             foreach (var incidentEdge in currentNode.IncidentEdges())
             {
                 var node = incidentEdge.GetOtherNode(currentNode);
                 node.Edges.Remove(incidentEdge);
             }
-            _nodes.Remove(currentNode);
+            return _nodes.Remove(currentNode);
         }
 
-        public void AddEdge(int fromNumber, int toNumber)
+        public void Connect(int firstNumber, int secondNumber)
         {
-            var from = GetNode(fromNumber);
-            var to = GetNode(toNumber);
-            if (from == null || to == null)
+            if (!ContainsNode(firstNumber) || !ContainsNode(secondNumber))
             {
-                throw new ArgumentException("The number of two or one of the nodes was not found");
+                throw new ArgumentException("The number of two or one of the nodes was not found!");
             }
-            var edge = new Edge(from, to);
-            if (from.Edges.Contains(edge) || to.Edges.Contains(edge))
+            var first = GetNode(firstNumber);
+            var second = GetNode(secondNumber);
+            if (first.IsConnect(second) || second.IsConnect(first))
             {
                 throw new ArgumentException("This edge already exists!");
             }
-            from.Edges.Add(edge);
-            to.Edges.Add(edge);
+            var edge = new Edge(first, second);
+            first.Edges.Add(edge);
+            second.Edges.Add(edge);
         }
 
-        public void RemoveEdge(int fromNumber, int toNumber)
+        public bool Disconnect(int firstNumber, int secondNumber)
         {
-            var node = GetNode(fromNumber);
-            var edge = node?.Edges.Find(e => e.To.Number == toNumber);
-            if (edge == null)
+            if (!ContainsNode(firstNumber) || !ContainsNode(secondNumber))
             {
-                throw new ArgumentException("The number of two or one of the nodes was not found");
+                return false;
             }
-            edge.From.Edges.Remove(edge);
-            edge.To.Edges.Remove(edge);
+            var first = GetNode(firstNumber);
+            var second = GetNode(secondNumber);
+            if (!first.IsConnect(second) || !second.IsConnect(first))
+            {
+                return false;
+            }
+            var edge = first.Edges.Find(e => e.First.Equals(second) || e.Second.Equals(second));
+            return first.Edges.Remove(edge) && second.Edges.Remove(edge);
         }
 
-        public bool Contains(int number)
+        public bool ContainsNode(int number)
         {
             return _nodes.Select(node => node.Number)
                          .Contains(number);
+        }
+
+        public bool IsConnect(int firstNumber, int secondNumber)
+        {
+            var first = GetNode(firstNumber);
+            var second = GetNode(secondNumber);
+            if (first == null || second == null)
+            {
+                return false;
+            }
+            return first.IsConnect(second) && second.IsConnect(first);
         }
 
         private Node GetNode(int number)
