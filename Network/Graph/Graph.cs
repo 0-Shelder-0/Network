@@ -6,11 +6,11 @@ namespace Network.Graph
 {
     public class Graph : IGraph
     {
-        private readonly List<Node> _nodes;
+        private readonly Dictionary<int, Node> _nodes;
 
         public Graph()
         {
-            _nodes = new List<Node>();
+            _nodes = new Dictionary<int, Node>();
         }
 
         public void AddNode(int number)
@@ -19,22 +19,21 @@ namespace Network.Graph
             {
                 throw new ArgumentException("This node number already exists!");
             }
-            _nodes.Add(new Node(number));
+            _nodes[number] = new Node(number);
         }
 
         public bool RemoveNode(int number)
         {
-            if (!ContainsNode(number))
+            if (!_nodes.ContainsKey(number))
             {
                 return false;
             }
-            var currentNode = GetNode(number);
-            foreach (var incidentEdge in currentNode.IncidentEdges())
+            var currentNode = _nodes[number];
+            foreach (var incidentNode in currentNode.IncidentNodes())
             {
-                var node = incidentEdge.GetOtherNode(currentNode);
-                node.Edges.Remove(incidentEdge);
+                incidentNode.Edges.Remove(currentNode.Number);
             }
-            return _nodes.Remove(currentNode);
+            return _nodes.Remove(number);
         }
 
         public void Connect(int firstNumber, int secondNumber)
@@ -43,15 +42,15 @@ namespace Network.Graph
             {
                 throw new ArgumentException("The number of two or one of the nodes was not found!");
             }
-            var first = GetNode(firstNumber);
-            var second = GetNode(secondNumber);
+            var first = _nodes[firstNumber];
+            var second = _nodes[secondNumber];
             if (first.IsConnect(second) || second.IsConnect(first))
             {
                 throw new ArgumentException("This edge already exists!");
             }
             var edge = new Edge(first, second);
-            first.Edges.Add(edge);
-            second.Edges.Add(edge);
+            first.Edges[secondNumber] = edge;
+            second.Edges[firstNumber] = edge;
         }
 
         public bool Disconnect(int firstNumber, int secondNumber)
@@ -60,36 +59,25 @@ namespace Network.Graph
             {
                 return false;
             }
-            var first = GetNode(firstNumber);
-            var second = GetNode(secondNumber);
-            if (!first.IsConnect(second) || !second.IsConnect(first))
-            {
-                return false;
-            }
-            var edge = first.Edges.Find(e => e.First.Equals(second) || e.Second.Equals(second));
-            return first.Edges.Remove(edge) && second.Edges.Remove(edge);
+            var first = _nodes[firstNumber];
+            var second = _nodes[secondNumber];
+            return first.Edges.Remove(secondNumber) && second.Edges.Remove(firstNumber);
         }
 
         public bool ContainsNode(int number)
         {
-            return _nodes.Select(node => node.Number)
-                         .Contains(number);
+            return _nodes.ContainsKey(number);
         }
 
         public bool IsConnect(int firstNumber, int secondNumber)
         {
-            var first = GetNode(firstNumber);
-            var second = GetNode(secondNumber);
-            if (first == null || second == null)
+            if (!ContainsNode(firstNumber) || !ContainsNode(secondNumber))
             {
                 return false;
             }
+            var first = _nodes[firstNumber];
+            var second = _nodes[secondNumber];
             return first.IsConnect(second) && second.IsConnect(first);
-        }
-
-        private Node GetNode(int number)
-        {
-            return _nodes.Find(node => node.Number.Equals(number));
         }
     }
 }

@@ -6,28 +6,27 @@ namespace Network.Graph
     public class Node
     {
         public int Number { get; }
-        public readonly List<Edge> Edges;
+        public readonly Dictionary<int, Edge> Edges;
 
         public Node(int number)
         {
             Number = number;
-            Edges = new List<Edge>();
+            Edges = new Dictionary<int, Edge>();
         }
 
         public IEnumerable<Edge> IncidentEdges()
         {
-            return Edges;
+            return Edges.Values;
         }
 
         public IEnumerable<Node> IncidentNodes()
         {
-            return Edges.Select(edge => edge.GetOtherNode(this));
+            return Edges.Values.Select(edge => edge.GetOtherNode(this));
         }
 
         public bool IsConnect(Node node)
         {
-            return node.Equals(this) ||
-                   Edges.Any(edge => edge.Second.Equals(node) || edge.First.Equals(node));
+            return node.Equals(this) || Edges.ContainsKey(node.Number);
         }
 
         public override bool Equals(object obj)
@@ -44,7 +43,7 @@ namespace Network.Graph
 
         public override int GetHashCode()
         {
-            return Number.GetHashCode();
+            return Number;
         }
     }
 }

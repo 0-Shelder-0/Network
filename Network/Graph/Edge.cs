@@ -30,7 +30,8 @@ namespace Network.Graph
         {
             if (obj is Edge edge)
             {
-                if (edge.First.Equals(First) && edge.Second.Equals(Second))
+                if (edge.First.Equals(First) && edge.Second.Equals(Second)
+                    || edge.First.Equals(Second) && edge.Second.Equals(First))
                 {
                     return true;
                 }
@@ -40,7 +41,10 @@ namespace Network.Graph
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(First, Second);
+            unchecked
+            {
+                return First.GetHashCode() + Second.GetHashCode();
+            }
         }
     }
 }
