@@ -83,5 +83,17 @@ namespace Network.Graph
         {
             _nodes.Clear();
         }
+
+        public Node this[int number]
+        {
+            get
+            {
+                if (!ContainsNode(number))
+                {
+                    throw new ArgumentException("This node number was not found!");
+                }
+                return _nodes[number];
+            }
+        }
     }
 }

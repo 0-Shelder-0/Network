@@ -9,5 +9,7 @@ namespace Network.Graph
         bool ContainsNode(int number);
         bool IsConnect(int firstNumber, int secondNumber);
         void Clear();
+
+        Node this[int number] { get; }
     }
 }
