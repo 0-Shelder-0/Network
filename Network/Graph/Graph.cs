@@ -79,5 +79,10 @@ namespace Network.Graph
             var second = _nodes[secondNumber];
             return first.IsConnect(second) && second.IsConnect(first);
         }
+
+        public void Clear()
+        {
+            _nodes.Clear();
+        }
     }
 }

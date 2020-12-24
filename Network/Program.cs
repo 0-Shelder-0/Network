@@ -4,19 +4,13 @@
     {
         private static void Main()
         {
-            var g = new Graph.Graph();
-            g.AddNode(1);
-            g.AddNode(2);
-            g.AddNode(3);
+            RunBenchmark(5);
+        }
 
-            g.Connect(1, 2);
-            g.Connect(1, 3);
-            g.Connect(2, 3);
-
-            g.RemoveNode(4);
-
-            g.Disconnect(1, 1);
-            g.Disconnect(3, 1);
+        private static void RunBenchmark(int numberRepetitions)
+        {
+            const string path = "C:/Users/Vlad/Desktop/Tests";
+            Benchmark.Benchmark.Run(new Graph.Graph(), path, 1001, numberRepetitions);
         }
     }
 }

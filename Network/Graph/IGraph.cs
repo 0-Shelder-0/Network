@@ -8,5 +8,6 @@ namespace Network.Graph
         bool Disconnect(int firstNumber, int secondNumber);
         bool ContainsNode(int number);
         bool IsConnect(int firstNumber, int secondNumber);
+        void Clear();
     }
 }
