@@ -6,41 +6,60 @@ using Network.NetworkNodes;
 
 namespace Network.Network
 {
-    public class Network
+    public class Network : INetwork
     {
-        private readonly IGraph _graphOfNetwork;
         private readonly Dictionary<int, NetworkNode> _networkNodes;
+        private readonly IGraph _networkGraph;
 
-        public Network(IGraph graph)
+        public IGraphCheck GraphOfNetwork => _networkGraph;
+
+        public Network(IGraph networkGraph)
         {
-            _graphOfNetwork = graph;
+            _networkGraph = networkGraph;
             _networkNodes = new Dictionary<int, NetworkNode>();
         }
 
-        public void MakeNetwork(IEnumerable<NetworkNode> networkNodes, IEnumerable<(int, int)> links)
+        public void MakeNetwork(IEnumerable<NetworkNode> networkNodes,
+                                IEnumerable<(int FirstNode, int SecondNode, int Distance)> links)
         {
             foreach (var networkNode in networkNodes)
             {
                 AddNode(networkNode);
             }
 
-            foreach (var (firstNode, secondNode) in links)
+            foreach (var (firstNode, secondNode, weight) in links)
             {
-                Connect(firstNode, secondNode);
+                Connect(firstNode, secondNode, weight);
+            }
+        }
+
+        public NetworkNode this[int index]
+        {
+            get
+            {
+                if (!_networkNodes.ContainsKey(index))
+                {
+                    throw new ArgumentException("This host number was not found!");
+                }
+                return _networkNodes[index];
             }
         }
 
         private void AddNode(NetworkNode networkNode)
         {
             _networkNodes[networkNode.Number] = networkNode;
-            _graphOfNetwork.AddNode(networkNode.Number);
+            _networkGraph.AddNode(networkNode.Number);
         }
 
-        private void Connect(int firstNumber, int secondNumber)
+        private void Connect(int firstNumber, int secondNumber, int weight)
         {
             if (!ContainsNode(firstNumber) || !ContainsNode(secondNumber))
             {
                 throw new ArgumentException("The number of two or one of the nodes was not found!");
+            }
+            if (weight < 0)
+            {
+                throw new ArgumentException("The distance parameter must be non-negative!");
             }
             var firstNode = _networkNodes[firstNumber];
             var secondNode = _networkNodes[secondNumber];
@@ -55,7 +74,7 @@ namespace Network.Network
                     throw new ArgumentException("The end node of the network cannot have more than 1 connection!");
                 }
             }
-            _graphOfNetwork.Connect(firstNumber, secondNumber);
+            _networkGraph.Connect(firstNumber, secondNumber, weight);
         }
 
         private bool ContainsNode(int nodeNumber)
@@ -66,7 +85,7 @@ namespace Network.Network
         private bool IsPossibleAddLink(NetworkNode firstNode, NetworkNode secondNode)
         {
             var endNode = firstNode.Type == NodeType.EndNode ? firstNode : secondNode;
-            return !_graphOfNetwork[endNode.Number].IncidentEdges().Any();
+            return !GraphOfNetwork[endNode.Number].IncidentEdges().Any();
         }
     }
 }
