@@ -30,7 +30,7 @@ namespace Network.Graph
             var currentNode = _nodes[number];
             foreach (var incidentNode in currentNode.IncidentNodes())
             {
-                incidentNode.Edges.Remove(currentNode.Number);
+                incidentNode.Disconnect(currentNode);
             }
             return _nodes.Remove(number);
         }
@@ -47,9 +47,7 @@ namespace Network.Graph
             {
                 throw new ArgumentException("This edge already exists!");
             }
-            var edge = new Edge(first, second);
-            first.Edges[secondNumber] = edge;
-            second.Edges[firstNumber] = edge;
+            first.Connect(this, second);
         }
 
         public bool Disconnect(int firstNumber, int secondNumber)
@@ -60,7 +58,7 @@ namespace Network.Graph
             }
             var first = _nodes[firstNumber];
             var second = _nodes[secondNumber];
-            return first.Edges.Remove(secondNumber) && second.Edges.Remove(firstNumber);
+            return first.Disconnect(second);
         }
 
         public bool ContainsNode(int number)

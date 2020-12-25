@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,27 +7,44 @@ namespace Network.Graph
     public class Node
     {
         public int Number { get; }
-        public readonly Dictionary<int, Edge> Edges;
+        private readonly Dictionary<int, Edge> _edges;
 
         public Node(int number)
         {
             Number = number;
-            Edges = new Dictionary<int, Edge>();
+            _edges = new Dictionary<int, Edge>();
         }
 
         public IEnumerable<Edge> IncidentEdges()
         {
-            return Edges.Values;
+            return _edges.Values;
         }
 
         public IEnumerable<Node> IncidentNodes()
         {
-            return Edges.Values.Select(edge => edge.GetOtherNode(this));
+            return _edges.Values.Select(edge => edge.GetOtherNode(this));
+        }
+
+        public Edge Connect(IGraph graph, Node node)
+        {
+            if (!graph.ContainsNode(Number) || !graph.ContainsNode(node.Number))
+            {
+                throw new ArgumentException("This graph contains no current nodes!");
+            }
+            var edge = new Edge(this, node);
+            _edges[node.Number] = edge;
+            node._edges[Number] = edge;
+            return edge;
+        }
+
+        public bool Disconnect(Node node)
+        {
+            return _edges.Remove(node.Number) && node._edges.Remove(Number);
         }
 
         public bool IsConnect(Node node)
         {
-            return node.Equals(this) || Edges.ContainsKey(node.Number);
+            return node.Equals(this) || _edges.ContainsKey(node.Number);
         }
 
         public override bool Equals(object obj)
