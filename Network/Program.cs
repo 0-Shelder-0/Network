@@ -1,16 +1,31 @@
-﻿namespace Network
+﻿using System.Collections.Generic;
+using Network.NetworkNodes;
+
+namespace Network
 {
     static class Program
     {
         private static void Main()
         {
-            RunBenchmark(50);
-        }
-
-        private static void RunBenchmark(int numberRepetitions)
-        {
-            const string path = "C:/Users/Vlad/Desktop/Tests";
-            Benchmark.Benchmark.Run(new Graph.Graph(), path, 250, numberRepetitions);
+            var network = new Network.Network(new Graph.Graph());
+            var nodes = new List<NetworkNode>
+            {
+                new EndNode(0),
+                new Router(1),
+                new Router(2),
+                new Router(3),
+                new Router(4),
+                new EndNode(5)
+            };
+            var links = new List<(int, int)>
+            {
+                (0, 1),
+                (1, 2),
+                (2, 3),
+                (3, 4),
+                (4, 5)
+            };
+            network.MakeNetwork(nodes, links);
         }
     }
 }
