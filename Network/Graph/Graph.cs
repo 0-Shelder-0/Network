@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Network.Graph
 {
@@ -30,7 +31,7 @@ namespace Network.Graph
             var currentNode = _nodes[number];
             foreach (var incidentNode in currentNode.IncidentNodes())
             {
-                incidentNode.Disconnect(currentNode);
+                incidentNode.Disconnect(this, currentNode);
             }
             return _nodes.Remove(number);
         }
@@ -58,7 +59,7 @@ namespace Network.Graph
             }
             var first = _nodes[firstNumber];
             var second = _nodes[secondNumber];
-            return first.Disconnect(second);
+            return first.Disconnect(this, second);
         }
 
         public bool ContainsNode(int number)
@@ -75,6 +76,18 @@ namespace Network.Graph
             var first = _nodes[firstNumber];
             var second = _nodes[secondNumber];
             return first.IsConnect(second) && second.IsConnect(first);
+        }
+
+        public IEnumerable<Edge> GetEdges()
+        {
+            return _nodes.Values
+                         .SelectMany(edge => edge.IncidentEdges())
+                         .Distinct();
+        }
+
+        public IEnumerable<Node> GetNodes()
+        {
+            return _nodes.Values;
         }
 
         public void Clear()

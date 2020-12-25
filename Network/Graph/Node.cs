@@ -37,8 +37,12 @@ namespace Network.Graph
             return edge;
         }
 
-        public bool Disconnect(Node node)
+        public bool Disconnect(IGraph graph, Node node)
         {
+            if (!graph.IsConnect(Number, node.Number))
+            {
+                throw new ArgumentException("This graph contains no current nodes!");
+            }
             return _edges.Remove(node.Number) && node._edges.Remove(Number);
         }
 
