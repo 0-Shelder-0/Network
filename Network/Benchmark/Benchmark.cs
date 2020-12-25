@@ -9,7 +9,8 @@ namespace Network.Benchmark
 {
     public static class Benchmark
     {
-        public static void Run(IGraph graph, string directoryPath, int numberOfItems, int numberRepetitions)
+        public static void Run(IGraph graph, string directoryPath, int numberOfItems,
+                               int numberRepetitions)
         {
             numberOfItems++;
             var allResults = new List<(string, List<double>)>();
@@ -91,7 +92,7 @@ namespace Network.Benchmark
                 {
                     var item1 = parameters[0] as int? ?? 0;
                     var item2 = parameters[1] as int? ?? 0;
-                    graph.Connect(item1, item2);
+                    graph.Connect(item1, item2, 0);
                 }
             }
         }

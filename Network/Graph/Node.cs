@@ -25,13 +25,13 @@ namespace Network.Graph
             return _edges.Values.Select(edge => edge.GetOtherNode(this));
         }
 
-        public Edge Connect(IGraph graph, Node node)
+        public Edge Connect(IGraph graph, Node node, int weight)
         {
             if (!graph.ContainsNode(Number) || !graph.ContainsNode(node.Number))
             {
                 throw new ArgumentException("This graph contains no current nodes!");
             }
-            var edge = new Edge(this, node);
+            var edge = new Edge(this, node, weight);
             _edges[node.Number] = edge;
             node._edges[Number] = edge;
             return edge;
@@ -45,6 +45,18 @@ namespace Network.Graph
         public bool IsConnect(Node node)
         {
             return node.Equals(this) || _edges.ContainsKey(node.Number);
+        }
+
+        public Edge this[int otherNumber]
+        {
+            get
+            {
+                if (!_edges.ContainsKey(otherNumber))
+                {
+                    throw new ArgumentException();
+                }
+                return _edges[otherNumber];
+            }
         }
 
         public override bool Equals(object obj)
@@ -61,7 +73,7 @@ namespace Network.Graph
 
         public override int GetHashCode()
         {
-            return Number;
+            return HashCode.Combine(Number);
         }
     }
 }

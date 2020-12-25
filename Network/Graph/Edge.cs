@@ -6,11 +6,13 @@ namespace Network.Graph
     {
         public Node First { get; }
         public Node Second { get; }
+        public int Weight { get; }
 
-        public Edge(Node first, Node second)
+        public Edge(Node first, Node second, int weight)
         {
             First = first;
             Second = second;
+            Weight = weight;
         }
 
         public Node GetOtherNode(Node node)
@@ -30,8 +32,9 @@ namespace Network.Graph
         {
             if (obj is Edge edge)
             {
-                if (edge.First.Equals(First) && edge.Second.Equals(Second)
-                    || edge.First.Equals(Second) && edge.Second.Equals(First))
+                if (edge.Weight.Equals(Weight) &&
+                    (edge.First.Equals(First) && edge.Second.Equals(Second) ||
+                     edge.First.Equals(Second) && edge.Second.Equals(First)))
                 {
                     return true;
                 }
@@ -43,7 +46,7 @@ namespace Network.Graph
         {
             unchecked
             {
-                return First.GetHashCode() + Second.GetHashCode();
+                return First.GetHashCode() + Second.GetHashCode() + HashCode.Combine(Weight);
             }
         }
     }

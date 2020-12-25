@@ -35,7 +35,7 @@ namespace Network.Graph
             return _nodes.Remove(number);
         }
 
-        public void Connect(int firstNumber, int secondNumber)
+        public void Connect(int firstNumber, int secondNumber, int weight)
         {
             if (!ContainsNode(firstNumber) || !ContainsNode(secondNumber))
             {
@@ -47,7 +47,7 @@ namespace Network.Graph
             {
                 throw new ArgumentException("This edge already exists!");
             }
-            first.Connect(this, second);
+            first.Connect(this, second, weight);
         }
 
         public bool Disconnect(int firstNumber, int secondNumber)
@@ -91,6 +91,17 @@ namespace Network.Graph
                     throw new ArgumentException("This node number was not found!");
                 }
                 return _nodes[number];
+            }
+        }
+        public Edge this[int firstNumber, int secondNumber]
+        {
+            get
+            {
+                if (!ContainsNode(firstNumber) || !ContainsNode(secondNumber))
+                {
+                    throw new ArgumentException("The pair of nodes with these numbers was not found!");
+                }
+                return _nodes[firstNumber][secondNumber];
             }
         }
     }
