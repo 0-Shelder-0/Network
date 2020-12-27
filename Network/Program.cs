@@ -30,7 +30,8 @@ namespace Network
                 (4, 5, 1)
             };
             network.MakeNetwork(nodes, links);
-            var pathWithTime = router.GetPathsByDijkstra(network, 0, 5);
+            var dijkstra = router.GetPathsByDijkstra(network, 0, 5);
+            var bellmanFord = router.GetPathByBellmanFord(network, 0, 5);
         }
     }
 }

@@ -14,7 +14,7 @@ namespace Network.NetworkNodes
         {
             if (!ContainsItems(network, fromNumber, toNumber))
             {
-                throw new ArgumentException();
+                throw new ArgumentException("Not all elements are contained in the graph!");
             }
             if (!network.GraphOfNetwork.IsConnect(fromNumber, Number))
             {
@@ -38,9 +38,36 @@ namespace Network.NetworkNodes
             throw new Exception("Path not found!");
         }
 
-        public PathWithTime GetPathByBellmanFord(INetwork network, int fromNumber, int toNumber)
+        public PathWithTime GetPathByBellmanFord(INetwork network, int startNode, int finalNode)
         {
-            throw new NotImplementedException();
+            if (!ContainsItems(network, startNode, finalNode))
+            {
+                throw new ArgumentException("Not all elements are contained in the graph!");
+            }
+            if (!network.GraphOfNetwork.IsConnect(startNode, Number))
+            {
+                throw new ArgumentException($"Node number {startNode} is not connected to the current router!");
+            }
+            var edges = network.GraphOfNetwork.GetEdges().ToList();
+            var maxNodeIndex = network.GraphOfNetwork.GetNodes()
+                                      .Select(n => n.Number)
+                                      .Max();
+
+            var opt = Enumerable.Repeat(int.MaxValue, maxNodeIndex + 1).ToArray();
+            opt[startNode] = 0;
+
+            for (var pathSize = 1; pathSize <= maxNodeIndex; pathSize++)
+            {
+                foreach (var edge in edges)
+                {
+                    if (opt[edge.First.Number] != int.MaxValue)
+                    {
+                        opt[edge.Second.Number] =
+                            Math.Min(opt[edge.First.Number] + edge.Weight, opt[edge.Second.Number]);
+                    }
+                }
+            }
+            return new PathWithTime(new List<int>(), opt[finalNode]);
         }
 
         private int? GetNodeNumberWithMinCost(Dictionary<int, (int Cost, int PreNumber)> track, HashSet<int> visited)
@@ -60,10 +87,13 @@ namespace Network.NetworkNodes
                                        Dictionary<int, (int Cost, int PreNumber)> track,
                                        int preNodeNumber)
         {
-            foreach (var node in GetIncidentNodes(graph, visited, preNodeNumber))
+            foreach (var node in graph[preNodeNumber].IncidentNodes())
             {
                 var cost = track[preNodeNumber].Cost + graph[preNodeNumber, node.Number].Weight;
-                track[node.Number] = (cost, preNodeNumber);
+                if (!track.ContainsKey(node.Number) || track[node.Number].Cost > cost)
+                {
+                    track[node.Number] = (cost, preNodeNumber);
+                }
             }
             visited.Add(preNodeNumber);
         }
@@ -73,12 +103,6 @@ namespace Network.NetworkNodes
             return network.GraphOfNetwork.ContainsNode(Number) &&
                    network.GraphOfNetwork.ContainsNode(fromNumber) &&
                    network.GraphOfNetwork.ContainsNode(toNumber);
-        }
-
-        private static IEnumerable<Node> GetIncidentNodes(IGraphCheck graph, ICollection<int> visited, int number)
-        {
-            return graph[number].IncidentNodes()
-                                .Where(node => !visited.Contains(node.Number));
         }
 
         private PathWithTime RestorePath(int start, int end, Dictionary<int, (int Cost, int PreNumber)> track)
