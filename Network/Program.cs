@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Network.Graph;
+using System.Linq;
 using Network.NetworkNodes;
 
 namespace Network
@@ -18,7 +18,8 @@ namespace Network
                 new Router(2),
                 new Router(3),
                 new Router(4),
-                new EndNode(5)
+                new EndNode(9),
+                new EndNode(10)
             };
             var links = new List<(int, int, int)>
             {
@@ -27,11 +28,14 @@ namespace Network
                 (2, 3, 1),
                 (1, 3, 1),
                 (3, 4, 1),
-                (4, 5, 1)
+                (4, 9, 1),
+                (4, 10, 1)
             };
             network.MakeNetwork(nodes, links);
-            var dijkstra = router.GetPathsByDijkstra(network, 0, 5);
-            var bellmanFord = router.GetPathByBellmanFord(network, 0, 5);
+            var dijkstra = router.GetPathByDijkstra(network, 3, 10);
+            var bellmanFord = router.GetPathByBellmanFord(network, 3, 10);
+            Console.WriteLine(dijkstra.Time == bellmanFord.Time);
+            Console.WriteLine(dijkstra.Path.SequenceEqual(bellmanFord.Path));
         }
     }
 }

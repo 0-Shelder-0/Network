@@ -9,8 +9,7 @@ namespace Network.Benchmark
 {
     public static class Benchmark
     {
-        public static void Run(IGraph graph, string directoryPath, int numberOfItems,
-                               int numberRepetitions)
+        public static void Run(IGraph graph, string directoryPath, int numberOfItems, int numberRepetitions)
         {
             numberOfItems++;
             var allResults = new List<(string, List<double>)>();

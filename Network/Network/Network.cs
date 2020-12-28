@@ -8,10 +8,10 @@ namespace Network.Network
 {
     public class Network : INetwork
     {
+        public IGraphCheck GraphOfNetwork => _networkGraph;
+
         private readonly Dictionary<int, NetworkNode> _networkNodes;
         private readonly IGraph _networkGraph;
-
-        public IGraphCheck GraphOfNetwork => _networkGraph;
 
         public Network(IGraph networkGraph)
         {

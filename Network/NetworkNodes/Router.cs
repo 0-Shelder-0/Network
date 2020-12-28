@@ -10,7 +10,7 @@ namespace Network.NetworkNodes
     {
         public Router(int number) : base(number, NodeType.Router) { }
 
-        public PathWithTime GetPathsByDijkstra(INetwork network, int fromNumber, int toNumber)
+        public PathWithTime GetPathByDijkstra(INetwork network, int fromNumber, int toNumber)
         {
             if (!ContainsItems(network, fromNumber, toNumber))
             {
@@ -21,21 +21,18 @@ namespace Network.NetworkNodes
                 throw new ArgumentException($"Node number {fromNumber} is not connected to the current router!");
             }
             var visited = new HashSet<int>();
-            var track = new Dictionary<int, (int Cost, int PreNumber)> {[fromNumber] = (0, fromNumber)};
-            while (true)
+            var track = new Dictionary<int, TrackData> {[fromNumber] = new TrackData(0, fromNumber)};
+            var toOpen = GetNodeNumberWithMinCost(track, visited);
+            while (toOpen.HasValue)
             {
-                var toOpen = GetNodeNumberWithMinCost(track, visited);
-                if (!toOpen.HasValue)
-                {
-                    break;
-                }
                 if (toOpen.Value == toNumber)
                 {
-                    return RestorePath(fromNumber, toOpen.Value, track);
+                    return RestorePath(track, fromNumber, toOpen.Value);
                 }
                 AddCostToNextNode(network.GraphOfNetwork, visited, track, toOpen.Value);
+                toOpen = GetNodeNumberWithMinCost(track, visited);
             }
-            throw new Exception("Path not found!");
+            return new PathWithTime(new List<int>(), int.MaxValue);
         }
 
         public PathWithTime GetPathByBellmanFord(INetwork network, int startNode, int finalNode)
@@ -48,29 +45,47 @@ namespace Network.NetworkNodes
             {
                 throw new ArgumentException($"Node number {startNode} is not connected to the current router!");
             }
-            var edges = network.GraphOfNetwork.GetEdges().ToList();
-            var maxNodeIndex = network.GraphOfNetwork.GetNodes()
-                                      .Select(n => n.Number)
-                                      .Max();
+            var track = network.GraphOfNetwork.GetNodes()
+                               .ToDictionary(node => node.Number, value => new TrackData(int.MaxValue, 0));
+            track[startNode].Cost = 0;
 
-            var opt = Enumerable.Repeat(int.MaxValue, maxNodeIndex + 1).ToArray();
-            opt[startNode] = 0;
-
-            for (var pathSize = 1; pathSize <= maxNodeIndex; pathSize++)
+            for (var pathLength = 0; pathLength < track.Count; pathLength++)
             {
-                foreach (var edge in edges)
+                foreach (var edge in network.GraphOfNetwork.GetEdges())
                 {
-                    if (opt[edge.First.Number] != int.MaxValue)
-                    {
-                        opt[edge.Second.Number] =
-                            Math.Min(opt[edge.First.Number] + edge.Weight, opt[edge.Second.Number]);
-                    }
+                    CalculateOptimum(track, edge.First.Number, edge.Second.Number, edge.Weight);
+                    CalculateOptimum(track, edge.Second.Number, edge.First.Number, edge.Weight);
                 }
             }
-            return new PathWithTime(new List<int>(), opt[finalNode]);
+            return track[finalNode].Cost == int.MaxValue
+                       ? new PathWithTime(new List<int>(), int.MaxValue)
+                       : RestorePath(track, startNode, finalNode);
         }
 
-        private int? GetNodeNumberWithMinCost(Dictionary<int, (int Cost, int PreNumber)> track, HashSet<int> visited)
+        private PathWithTime RestorePath(Dictionary<int, TrackData> track, int start, int end)
+        {
+            var path = new List<int>();
+            var time = track[end].Cost;
+            while (end != start)
+            {
+                path.Add(end);
+                end = track[end].Previous;
+            }
+            path.Add(start);
+            path.Reverse();
+
+            return new PathWithTime(path, time);
+        }
+
+        private void CalculateOptimum(Dictionary<int, TrackData> track, int first, int second, int weight)
+        {
+            if (track[first].Cost != int.MaxValue && track[first].Cost + weight < track[second].Cost)
+            {
+                track[second] = new TrackData(track[first].Cost + weight, first);
+            }
+        }
+
+        private int? GetNodeNumberWithMinCost(Dictionary<int, TrackData> track, HashSet<int> visited)
         {
             int? toOpen = null;
             var bestPrice = int.MaxValue;
@@ -84,18 +99,18 @@ namespace Network.NetworkNodes
 
         private void AddCostToNextNode(IGraphCheck graph,
                                        HashSet<int> visited,
-                                       Dictionary<int, (int Cost, int PreNumber)> track,
-                                       int preNodeNumber)
+                                       Dictionary<int, TrackData> track,
+                                       int previous)
         {
-            foreach (var node in graph[preNodeNumber].IncidentNodes())
+            foreach (var node in graph[previous].IncidentNodes())
             {
-                var cost = track[preNodeNumber].Cost + graph[preNodeNumber, node.Number].Weight;
+                var cost = track[previous].Cost + graph[previous, node.Number].Weight;
                 if (!track.ContainsKey(node.Number) || track[node.Number].Cost > cost)
                 {
-                    track[node.Number] = (cost, preNodeNumber);
+                    track[node.Number] = new TrackData(cost, previous);
                 }
             }
-            visited.Add(preNodeNumber);
+            visited.Add(previous);
         }
 
         private bool ContainsItems(INetwork network, int fromNumber, int toNumber)
@@ -105,27 +120,21 @@ namespace Network.NetworkNodes
                    network.GraphOfNetwork.ContainsNode(toNumber);
         }
 
-        private PathWithTime RestorePath(int start, int end, Dictionary<int, (int Cost, int PreNumber)> track)
-        {
-            var path = new List<int>();
-            var time = track[end].Cost;
-            while (end != start)
-            {
-                path.Add(end);
-                end = track[end].PreNumber;
-            }
-            path.Add(start);
-            path.Reverse();
-
-            return new PathWithTime(path, time);
-        }
-
-        private bool IsBestCost(IReadOnlyDictionary<int, (int Cost, int PreNumber)> track,
-                                int nodeNumber,
-                                int bestPrice,
-                                ICollection<int> visited)
+        private bool IsBestCost(Dictionary<int, TrackData> track, int nodeNumber, int bestPrice, HashSet<int> visited)
         {
             return !visited.Contains(nodeNumber) && track[nodeNumber].Cost < bestPrice;
+        }
+
+        private class TrackData
+        {
+            public int Cost { get; set; }
+            public int Previous { get; set; }
+
+            public TrackData(int cost, int previous)
+            {
+                Cost = cost;
+                Previous = previous;
+            }
         }
     }
 }
