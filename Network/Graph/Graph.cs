@@ -6,11 +6,15 @@ namespace Network.Graph
 {
     public class Graph : IGraph
     {
+        public int NumberNodes => _nodes.Count;
+        public int NumberEdges { get; private set; }
+
         private readonly Dictionary<int, Node> _nodes;
 
         public Graph()
         {
             _nodes = new Dictionary<int, Node>();
+            NumberEdges = 0;
         }
 
         public void AddNode(int number)
@@ -49,6 +53,7 @@ namespace Network.Graph
                 throw new ArgumentException("This edge already exists!");
             }
             first.Connect(this, second, weight);
+            NumberEdges++;
         }
 
         public bool Disconnect(int firstNumber, int secondNumber)
@@ -59,6 +64,7 @@ namespace Network.Graph
             }
             var first = _nodes[firstNumber];
             var second = _nodes[secondNumber];
+            NumberEdges--;
             return first.Disconnect(this, second);
         }
 

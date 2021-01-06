@@ -5,9 +5,9 @@ using System.IO;
 using System.Linq;
 using Network.Graph;
 
-namespace Network.Benchmark
+namespace Network.Benchmarks
 {
-    public static class Benchmark
+    public static class GraphBenchmark
     {
         public static void Run(IGraph graph, string directoryPath, int numberOfItems, int numberRepetitions)
         {

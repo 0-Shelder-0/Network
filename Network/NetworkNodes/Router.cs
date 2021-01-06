@@ -49,7 +49,7 @@ namespace Network.NetworkNodes
                                .ToDictionary(node => node.Number, value => new TrackData(int.MaxValue, 0));
             track[startNode].Cost = 0;
 
-            for (var pathLength = 0; pathLength < track.Count; pathLength++)
+            for (var pathLength = 1; pathLength < network.GraphOfNetwork.NumberNodes; pathLength++)
             {
                 foreach (var edge in network.GraphOfNetwork.GetEdges())
                 {
