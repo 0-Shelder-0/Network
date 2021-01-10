@@ -13,10 +13,66 @@ namespace Network.Network
         private readonly Dictionary<int, NetworkNode> _networkNodes;
         private readonly IGraph _networkGraph;
 
-        public Network(IGraph networkGraph)
+        public Network()
         {
-            _networkGraph = networkGraph;
+            _networkGraph = new Graph.Graph();
             _networkNodes = new Dictionary<int, NetworkNode>();
+        }
+
+        public void AddNode(NetworkNode networkNode)
+        {
+            _networkGraph.AddNode(networkNode.Number);
+            _networkNodes[networkNode.Number] = networkNode;
+        }
+
+        public bool RemoveNode(int number)
+        {
+            if (_networkNodes.ContainsKey(number))
+            {
+                return _networkGraph.RemoveNode(number) && _networkNodes.Remove(number);
+            }
+            return false;
+        }
+
+        public void Connect(int firstNumber, int secondNumber, int weight)
+        {
+            if (!ContainsNode(firstNumber) || !ContainsNode(secondNumber))
+            {
+                throw new ArgumentException("The number of two or one of the nodes was not found!");
+            }
+            if (weight < 0)
+            {
+                throw new ArgumentException("The distance parameter must be non-negative!");
+            }
+            var firstNode = _networkNodes[firstNumber];
+            var secondNode = _networkNodes[secondNumber];
+            if (firstNode.Type == NodeType.EndNode && secondNode.Type == NodeType.EndNode)
+            {
+                throw new ArgumentException("End node can only be connected to a router!");
+            }
+            if (firstNode.Type == NodeType.EndNode || secondNode.Type == NodeType.EndNode)
+            {
+                if (!IsPossibleAddLink(firstNode, secondNode))
+                {
+                    throw new ArgumentException("The end node of the network cannot have more than 1 connection!");
+                }
+            }
+            _networkGraph.Connect(firstNumber, secondNumber, weight);
+        }
+
+        public bool IsConnect(int firstNumber, int secondNumber)
+        {
+            return _networkGraph.IsConnect(firstNumber, secondNumber);
+        }
+
+        public bool Disconnect(int firstNumber, int secondNumber)
+        {
+            return _networkGraph.Disconnect(firstNumber, secondNumber);
+        }
+
+        public bool ContainsNode(int nodeNumber)
+        {
+            return _networkNodes.ContainsKey(nodeNumber);
         }
 
         public void MakeNetwork(IEnumerable<NetworkNode> networkNodes,
@@ -43,43 +99,6 @@ namespace Network.Network
                 }
                 return _networkNodes[index];
             }
-        }
-
-        private void AddNode(NetworkNode networkNode)
-        {
-            _networkNodes[networkNode.Number] = networkNode;
-            _networkGraph.AddNode(networkNode.Number);
-        }
-
-        private void Connect(int firstNumber, int secondNumber, int weight)
-        {
-            if (!ContainsNode(firstNumber) || !ContainsNode(secondNumber))
-            {
-                throw new ArgumentException("The number of two or one of the nodes was not found!");
-            }
-            if (weight < 0)
-            {
-                throw new ArgumentException("The distance parameter must be non-negative!");
-            }
-            var firstNode = _networkNodes[firstNumber];
-            var secondNode = _networkNodes[secondNumber];
-            if (firstNode.Type == NodeType.EndNode && secondNode.Type == NodeType.EndNode)
-            {
-                throw new ArgumentException("End node can only be connected to a router!");
-            }
-            if (firstNode.Type == NodeType.EndNode || secondNode.Type == NodeType.EndNode)
-            {
-                if (!IsPossibleAddLink(firstNode, secondNode))
-                {
-                    throw new ArgumentException("The end node of the network cannot have more than 1 connection!");
-                }
-            }
-            _networkGraph.Connect(firstNumber, secondNumber, weight);
-        }
-
-        private bool ContainsNode(int nodeNumber)
-        {
-            return _networkNodes.ContainsKey(nodeNumber);
         }
 
         private bool IsPossibleAddLink(NetworkNode firstNode, NetworkNode secondNode)

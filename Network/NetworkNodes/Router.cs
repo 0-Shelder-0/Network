@@ -128,7 +128,7 @@ namespace Network.NetworkNodes
         private class TrackData
         {
             public int Cost { get; set; }
-            public int Previous { get; set; }
+            public int Previous { get; }
 
             public TrackData(int cost, int previous)
             {
